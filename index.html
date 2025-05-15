@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Registro de Empleados</title>
+</head>
+<body>
+  <h2>Registro de Empleados</h2>
+  <form id="formEmpleado">
+    <input name="nombre" placeholder="Nombre" required><br>
+    <input name="correo" placeholder="Correo" required><br>
+    <input name="departamento" placeholder="Departamento"><br>
+    <input name="jefeDirecto" placeholder="Jefe Directo"><br>
+    <input name="correoJefe" placeholder="Correo del Jefe"><br>
+    <input type="date" name="fechaIngreso"><br>
+    <button type="submit">Guardar</button>
+  </form>
+
+  <h3>Empleados Registrados</h3>
+  <ul id="listaEmpleados"></ul>
+
+  <script>
+    const URL_SCRIPT = 'https://script.google.com/macros/s/TU_WEBAPP/exec'; // <-- pega aquí tu URL real
+
+    document.getElementById('formEmpleado').addEventListener('submit', async e => {
+      e.preventDefault();
+      const datos = Object.fromEntries(new FormData(e.target).entries());
+      datos.accion = 'guardarEmpleado';
+
+      try {
+        await fetch(URL_SCRIPT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(datos)
+        });
+        alert('Empleado guardado');
+        cargarEmpleados();
+      } catch (err) {
+        alert('❌ No se pudo conectar con el servidor.');
+        console.error(err);
+      }
+    });
+
+    async function cargarEmpleados() {
+      try {
+        const res = await fetch(URL_SCRIPT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ accion: 'listarEmpleados' })
+        });
+        const empleados = await res.json();
+        const lista = document.getElementById('listaEmpleados');
+        lista.innerHTML = '';
+        empleados.forEach(emp => {
+          lista.innerHTML += `<li>${emp.ID} - ${emp.Nombre} (${emp.Correo})</li>`;
+        });
+      } catch (err) {
+        alert('❌ Error al listar empleados.');
+        console.error(err);
+      }
+    }
+
+    cargarEmpleados();
+  </script>
+</body>
+</html>
